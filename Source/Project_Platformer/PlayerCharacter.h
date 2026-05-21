@@ -27,6 +27,24 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	
+	
+public:
+	
+	UFUNCTION(BlueprintCallable, Category = "Player|Death")
+	void KillPlayer();
+	
+	UFUNCTION(BlueprintCallable, Category = "Player|Respawn")
+	void RespawnPlayer();
+	
+	UFUNCTION(BlueprintCallable, Category = "Player|Respawn")
+	void SetRespawnTransform(const FTransform& NewRespawnTransform);
+	
+	UFUNCTION(BlueprintImplementableEvent, Category = "Player|Events")
+	void OnPlayerDied();
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "Player|Events")
+	void OnPlayerRespawned();
+	
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
 	TObjectPtr<USpringArmComponent> CameraBoom;
@@ -121,4 +139,8 @@ private:
 	
 	float CoyoteTimeCounter = 0.0f;
 	float JumpBufferCounter = 0.0f;
+	
+	FTransform RespawnTransform;
+
+	bool bIsDead = false;
 };

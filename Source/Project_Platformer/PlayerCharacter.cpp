@@ -38,6 +38,8 @@ void APlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	RespawnTransform = GetActorTransform();
+	
 	const APlayerController* PlayerController = Cast<APlayerController>(GetController());
 	if (!PlayerController)
 	{
@@ -100,6 +102,51 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	}
 }
 
+void APlayerCharacter::KillPlayer()
+{
+	if (bIsDead)
+	{
+		return;
+	}
+	
+	if (GEngine)
+	{
+		GEngine->AddOnScreenDebugMessage(
+			-1,
+			2.0f,
+			FColor::Red,
+			TEXT("Player killed")
+		);
+	}
+
+	bIsDead = true;
+
+	OnPlayerDied();
+
+	RespawnPlayer();
+}
+
+
+void APlayerCharacter::RespawnPlayer()
+{
+	SetActorTransform(RespawnTransform, false, nullptr, ETeleportType::TeleportPhysics);
+
+	UCharacterMovementComponent* MovementComponent = GetCharacterMovement();
+	if (MovementComponent)
+	{
+		MovementComponent->StopMovementImmediately();
+		MovementComponent->SetMovementMode(MOVE_Walking);
+	}
+
+	bIsDead = false;
+
+	OnPlayerRespawned();
+}
+
+void APlayerCharacter::SetRespawnTransform(const FTransform& NewRespawnTransform)
+{
+	RespawnTransform = NewRespawnTransform;
+}
 void APlayerCharacter::ApplyFixedCameraSettings()
 {
 	if (!CameraBoom)
@@ -144,6 +191,11 @@ void APlayerCharacter::ApplyMovementSettings()
 
 void APlayerCharacter::Move(const FInputActionValue& Value)
 {
+	if (bIsDead)
+	{
+		return;
+	}
+	
 	const FVector2D MoveInput = Value.Get<FVector2D>();
 	
 	if (MoveInput.IsNearlyZero())
@@ -170,6 +222,11 @@ void APlayerCharacter::Move(const FInputActionValue& Value)
 
 void APlayerCharacter::JumpStarted()
 {
+	if (bIsDead)
+	{
+		return;
+	}
+	
 	bIsJumpInputHeld = true;
 	JumpBufferCounter = JumpBufferTime;
 }
@@ -193,6 +250,11 @@ void APlayerCharacter::JumpStopped()
 
 void APlayerCharacter::SprintStarted()
 {
+	if (bIsDead)
+	{
+		return;
+	}
+	
 	bIsSprinting = true;
 	ApplyCurrentMoveSpeed();
 }
