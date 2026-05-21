@@ -75,6 +75,12 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement|Jump")
 	float JumpReleaseVelocityMultiplier = 0.45f;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement|Jump")
+	float CoyoteTime = 0.10f;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement|Jump")
+	float JumpBufferTime = 0.10f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement|Gravity")
 	float GravityStrength = 2.4f;
@@ -105,7 +111,14 @@ private:
 	void SprintStarted();
 	void SprintStopped();
 	void ApplyCurrentMoveSpeed();
+	
+	void UpdateJumpForgiveness(float DeltaTime);
+	void TryConsumeBufferedJump();
 
 private:
 	bool bIsSprinting = false;
+	bool bIsJumpInputHeld = false;
+	
+	float CoyoteTimeCounter = 0.0f;
+	float JumpBufferCounter = 0.0f;
 };

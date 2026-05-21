@@ -67,6 +67,9 @@ void APlayerCharacter::BeginPlay()
 void APlayerCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	
+	UpdateJumpForgiveness(DeltaTime);
+	TryConsumeBufferedJump();
 
 }
 
@@ -167,11 +170,13 @@ void APlayerCharacter::Move(const FInputActionValue& Value)
 
 void APlayerCharacter::JumpStarted()
 {
-	Jump();
+	bIsJumpInputHeld = true;
+	JumpBufferCounter = JumpBufferTime;
 }
 
 void APlayerCharacter::JumpStopped()
 {
+	bIsJumpInputHeld = false;
 	StopJumping();
 	
 	UCharacterMovementComponent* MovementComponent = GetCharacterMovement();
@@ -207,5 +212,51 @@ void APlayerCharacter::ApplyCurrentMoveSpeed()
 	}
 
 	MovementComponent->MaxWalkSpeed = bIsSprinting ? SprintSpeed : WalkSpeed;
+}
+
+void APlayerCharacter::UpdateJumpForgiveness(float DeltaTime)
+{
+	UCharacterMovementComponent* MovementComponent = GetCharacterMovement();
+	if (!MovementComponent)
+	{
+		return;
+	}
+	
+	if (MovementComponent->IsMovingOnGround())
+	{
+		CoyoteTimeCounter = CoyoteTime;
+	}
+	else
+	{
+		CoyoteTimeCounter -= DeltaTime;
+	}
+	
+	if (JumpBufferCounter > 0.0f)
+	{
+		JumpBufferCounter -= DeltaTime;
+	}
+}
+
+void APlayerCharacter::TryConsumeBufferedJump()
+{
+	if (JumpBufferCounter <= 0.0f)
+	{
+		return;
+	}
+	
+	if (CoyoteTimeCounter <= 0.0f)
+	{
+		return;
+	}
+	
+	Jump();
+	
+	if (!bIsJumpInputHeld)
+	{
+		StopJumping();
+	}
+	
+	JumpBufferCounter = 0.0f;
+	CoyoteTimeCounter = 0.0f;
 }
 
