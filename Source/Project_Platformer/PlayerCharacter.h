@@ -50,28 +50,37 @@ protected:
 	
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement|Ground")
-	float GroundMoveSpeed = 900.0f;
+	float WalkSpeed = 900.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement|Ground")
-	float GroundAcceleration = 6000.0f;
+	float SprintSpeed = 1450.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement|Ground")
-	float GroundBrakingDeceleration = 6000.0f;
+	float GroundAcceleration = 6500.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement|Ground")
+	float GroundBrakingDeceleration = 7000.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement|Ground")
 	float GroundFriction = 10.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement|Air")
-	float AirControlStrength = 0.85f;
+	float AirControlStrength = 0.75f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement|Jump")
 	float JumpVelocity = 900.0f;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement|Jump")
+	float JumpHoldTime = 0.18f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement|Jump")
+	float JumpReleaseVelocityMultiplier = 0.45f;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement|Gravity")
-	float GravityScale = 2.2f;
+	float GravityStrength = 2.4f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement|Rotation")
-	float MovementRotationRate = 720.0f;
+	float MovementRotationRate = 1440.0f;
 
 	UFUNCTION(BlueprintCallable, Category = "Movement")
 	void ApplyMovementSettings();
@@ -86,8 +95,17 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
 	TObjectPtr<UInputAction> JumpAction;
 	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
+    TObjectPtr<UInputAction> SprintAction;
+	
 private:
 	void Move(const FInputActionValue& Value);
 	void JumpStarted();
 	void JumpStopped();
+	void SprintStarted();
+	void SprintStopped();
+	void ApplyCurrentMoveSpeed();
+
+private:
+	bool bIsSprinting = false;
 };

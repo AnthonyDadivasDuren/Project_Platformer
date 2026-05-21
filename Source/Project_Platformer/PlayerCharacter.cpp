@@ -89,7 +89,11 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	{
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &APlayerCharacter::JumpStarted);
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this , &APlayerCharacter::JumpStopped);
-		
+	}
+	if (SprintAction)
+	{
+		EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Started, this, &APlayerCharacter::SprintStarted);
+		EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Completed, this, &APlayerCharacter::SprintStopped);
 	}
 }
 
@@ -120,17 +124,19 @@ void APlayerCharacter::ApplyMovementSettings()
 		return;
 	}
 
-	MovementComponent->MaxWalkSpeed = GroundMoveSpeed;
+	MovementComponent->MaxWalkSpeed = bIsSprinting ? SprintSpeed : WalkSpeed;
 	MovementComponent->MaxAcceleration = GroundAcceleration;
 	MovementComponent->BrakingDecelerationWalking = GroundBrakingDeceleration;
 	MovementComponent->GroundFriction = GroundFriction;
 	MovementComponent->AirControl = AirControlStrength;
 	MovementComponent->JumpZVelocity = JumpVelocity;
-	MovementComponent->GravityScale = GravityScale;
-	
+	MovementComponent->GravityScale = GravityStrength;
+
 	MovementComponent->bOrientRotationToMovement = true;
-	
 	MovementComponent->RotationRate = FRotator(0.0f, MovementRotationRate, 0.0f);
+
+	JumpMaxHoldTime = JumpHoldTime;
+	JumpMaxCount = 1;
 }
 
 void APlayerCharacter::Move(const FInputActionValue& Value)
@@ -167,5 +173,39 @@ void APlayerCharacter::JumpStarted()
 void APlayerCharacter::JumpStopped()
 {
 	StopJumping();
+	
+	UCharacterMovementComponent* MovementComponent = GetCharacterMovement();
+	if (!MovementComponent)
+	{
+		return;
+	}
+	
+	if (MovementComponent->IsFalling() && MovementComponent->Velocity.Z > 0.0f)
+	{
+		MovementComponent->Velocity.Z *= JumpReleaseVelocityMultiplier;
+	}
+}
+
+void APlayerCharacter::SprintStarted()
+{
+	bIsSprinting = true;
+	ApplyCurrentMoveSpeed();
+}
+
+void APlayerCharacter::SprintStopped()
+{
+	bIsSprinting = false;
+	ApplyCurrentMoveSpeed();
+}
+
+void APlayerCharacter::ApplyCurrentMoveSpeed()
+{
+	UCharacterMovementComponent* MovementComponent = GetCharacterMovement();
+	if (!MovementComponent)
+	{
+		return;
+	}
+
+	MovementComponent->MaxWalkSpeed = bIsSprinting ? SprintSpeed : WalkSpeed;
 }
 
