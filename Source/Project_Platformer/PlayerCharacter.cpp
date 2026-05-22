@@ -10,6 +10,8 @@
 #include "TimerManager.h"
 #include "PlayerAirDashComponent.h"
 #include "PlayerWallMovementComponent.h"
+#include "Kismet/GameplayStatics.h"
+#include "ResettableLevelObject.h"
 
 APlayerCharacter::APlayerCharacter()
 {
@@ -155,6 +157,8 @@ void APlayerCharacter::KillPlayer()
 
 void APlayerCharacter::RespawnPlayer()
 {
+	ResetLevelObjects();
+	
 	SetActorHiddenInGame(false);
 	SetActorEnableCollision(true);
 	
@@ -401,3 +405,22 @@ void APlayerCharacter::TryConsumeBufferedJump()
 	CoyoteTimeCounter = 0.0f;
 }
 
+void APlayerCharacter::ResetLevelObjects()
+{
+	TArray<AActor*> ResettableActors;
+	UGameplayStatics::GetAllActorsWithInterface(
+		GetWorld(),
+		UResettableLevelObject::StaticClass(),
+		ResettableActors
+	);
+
+	for (AActor* Actor : ResettableActors)
+	{
+		if (!Actor)
+		{
+			continue;
+		}
+
+		IResettableLevelObject::Execute_ResetLevelObject(Actor);
+	}
+}

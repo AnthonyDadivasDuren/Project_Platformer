@@ -149,6 +149,7 @@ private:
 	
 	void UpdateJumpForgiveness(float DeltaTime);
 	void TryConsumeBufferedJump();
+	void ResetLevelObjects();
 
 private:
 	bool bIsSprinting = false;
