@@ -8,6 +8,7 @@
 #include "InputAction.h"
 #include "InputMappingContext.h"
 #include "TimerManager.h"
+#include "PlayerAirDashComponent.h"
 
 APlayerCharacter::APlayerCharacter()
 {
@@ -18,6 +19,8 @@ APlayerCharacter::APlayerCharacter()
 	
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
+	
+	AirDashComponent = CreateDefaultSubobject<UPlayerAirDashComponent>(TEXT("AirDashComponent"));
 	
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationYaw = false;
@@ -105,6 +108,10 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	{
 		EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Started, this, &APlayerCharacter::SprintStarted);
 		EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Completed, this, &APlayerCharacter::SprintStopped);
+	}
+	if (DashAction)
+	{
+		EnhancedInputComponent->BindAction(DashAction, ETriggerEvent::Started, this, &APlayerCharacter::DashStarted);
 	}
 }
 
@@ -295,6 +302,38 @@ void APlayerCharacter::ApplyCurrentMoveSpeed()
 	}
 
 	MovementComponent->MaxWalkSpeed = bIsSprinting ? SprintSpeed : WalkSpeed;
+}
+
+void APlayerCharacter::DashStarted()
+{
+	if (bIsDead)
+	{
+		return;
+	}
+	
+	if (!AirDashComponent)
+	{
+		return;
+	}
+	
+	FVector DashDirection = FVector::ZeroVector;
+	
+	if (GetCharacterMovement())
+	{
+		DashDirection = GetCharacterMovement()->GetLastInputVector();
+	}
+
+	if (DashDirection.IsNearlyZero() && GetCharacterMovement())
+	{
+		DashDirection = GetCharacterMovement()->Velocity;
+	}
+
+	if (DashDirection.IsNearlyZero())
+	{
+		DashDirection = GetActorForwardVector();
+	}
+
+	AirDashComponent->TryStartDash(DashDirection);
 }
 
 void APlayerCharacter::UpdateJumpForgiveness(float DeltaTime)

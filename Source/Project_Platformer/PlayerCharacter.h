@@ -9,6 +9,7 @@ class USpringArmComponent;
 class UCameraComponent;
 class UInputMappingContext;
 class UInputAction;
+class UPlayerAirDashComponent;
 
 
 UCLASS()
@@ -55,6 +56,8 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
 	TObjectPtr<UCameraComponent> FollowCamera;
 	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	TObjectPtr<UPlayerAirDashComponent> AirDashComponent;
 protected:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera|Fixed Follow")
@@ -125,6 +128,8 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
     TObjectPtr<UInputAction> SprintAction;
 	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
+	TObjectPtr<UInputAction> DashAction;
 private:
 	void Move(const FInputActionValue& Value);
 	void JumpStarted();
@@ -132,6 +137,7 @@ private:
 	void SprintStarted();
 	void SprintStopped();
 	void ApplyCurrentMoveSpeed();
+	void DashStarted();
 	
 	void UpdateJumpForgiveness(float DeltaTime);
 	void TryConsumeBufferedJump();
