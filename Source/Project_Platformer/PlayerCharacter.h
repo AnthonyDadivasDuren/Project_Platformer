@@ -10,6 +10,7 @@ class UCameraComponent;
 class UInputMappingContext;
 class UInputAction;
 class UPlayerAirDashComponent;
+class UPlayerWallMovementComponent;
 
 
 UCLASS()
@@ -58,6 +59,10 @@ protected:
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<UPlayerAirDashComponent> AirDashComponent;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	TObjectPtr<UPlayerWallMovementComponent> WallMovementComponent;
+	
 protected:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera|Fixed Follow")
@@ -105,6 +110,9 @@ protected:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement|Jump")
 	float JumpBufferTime = 0.10f;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement|Wall Jump")
+	bool bResetAirDashOnWallJump = true;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement|Gravity")
 	float GravityStrength = 2.4f;

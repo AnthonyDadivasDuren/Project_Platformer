@@ -9,6 +9,7 @@
 #include "InputMappingContext.h"
 #include "TimerManager.h"
 #include "PlayerAirDashComponent.h"
+#include "PlayerWallMovementComponent.h"
 
 APlayerCharacter::APlayerCharacter()
 {
@@ -21,6 +22,7 @@ APlayerCharacter::APlayerCharacter()
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
 	
 	AirDashComponent = CreateDefaultSubobject<UPlayerAirDashComponent>(TEXT("AirDashComponent"));
+	WallMovementComponent = CreateDefaultSubobject<UPlayerWallMovementComponent>(TEXT("WallMovementComponent"));
 	
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationYaw = false;
@@ -263,6 +265,11 @@ void APlayerCharacter::JumpStopped()
 {
 	bIsJumpInputHeld = false;
 	StopJumping();
+
+	if (WallMovementComponent && WallMovementComponent->CutWallJumpShort())
+	{
+		return;
+	}
 	
 	UCharacterMovementComponent* MovementComponent = GetCharacterMovement();
 	if (!MovementComponent)
@@ -363,6 +370,18 @@ void APlayerCharacter::TryConsumeBufferedJump()
 {
 	if (JumpBufferCounter <= 0.0f)
 	{
+		return;
+	}
+
+	if (WallMovementComponent && WallMovementComponent->TryWallJump())
+	{
+		if (bResetAirDashOnWallJump && AirDashComponent)
+		{
+			AirDashComponent->ResetDash();
+		}
+
+		JumpBufferCounter = 0.0f;
+		CoyoteTimeCounter = 0.0f;
 		return;
 	}
 	
