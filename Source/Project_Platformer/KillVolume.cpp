@@ -6,7 +6,7 @@
 
 AKillVolume::AKillVolume()
 {
-	PrimaryActorTick.bCanEverTick = false;
+	PrimaryActorTick.bCanEverTick = true;
 
 	KillBox = CreateDefaultSubobject<UBoxComponent>(TEXT("KillBox"));
 	SetRootComponent(KillBox);
@@ -28,6 +28,27 @@ void AKillVolume::BeginPlay()
 	Super::BeginPlay();
 
 	KillBox->OnComponentBeginOverlap.AddDynamic(this, &AKillVolume::OnKillBoxOverlap);
+}
+
+void AKillVolume::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	if (!bShouldRotate)
+	{
+		return;
+	}
+
+	const FRotator RotationThisFrame = RotationSpeed * DeltaTime;
+
+	if (bUseLocalRotation)
+	{
+		AddActorLocalRotation(RotationThisFrame);
+	}
+	else
+	{
+		AddActorWorldRotation(RotationThisFrame);
+	}
 }
 
 void AKillVolume::OnKillBoxOverlap(
