@@ -20,7 +20,7 @@ public:
 	
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	
-	UFUNCTION(BlueprintCallable, Category = "Movement||Wall")
+	UFUNCTION(BlueprintCallable, Category = "Movement|Wall")
 	bool CanWallJump() const;
 	
 	UFUNCTION(BlueprintCallable, Category = "Movement|Wall")
@@ -47,6 +47,12 @@ public:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement|Wall Detection" )
 	float ValidWallNormalZLimit = 0.35f;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement|Wall Detection")
+	bool bUseBlockedWallTag = true;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement|Wall Detection")
+	FName BlockedWallTag = TEXT("NoWallMovement");
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement|Wall Slide" )
 	float WallSlideMaxFallSpeed = 650.0f;
@@ -88,6 +94,7 @@ public:
 	bool IsValidWallHit(const FHitResult& Hit) const;
 	void ClearWallState();
 	bool bPerformedWallJump = false;
+	bool HasBlockedWallTag(const FHitResult& Hit) const;
 	
 private:
 	UPROPERTY()

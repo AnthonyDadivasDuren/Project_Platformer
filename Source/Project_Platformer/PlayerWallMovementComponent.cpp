@@ -220,8 +220,41 @@ bool UPlayerWallMovementComponent::IsValidWallHit(const FHitResult& Hit) const
 	}
 
 	const FVector Normal = Hit.ImpactNormal;
+	const bool bSurfaceIsWallLike = FMath::Abs(Normal.Z) <= ValidWallNormalZLimit;
 
-	return FMath::Abs(Normal.Z) <= ValidWallNormalZLimit;
+	if (!bSurfaceIsWallLike)
+	{
+		return false;
+	}
+
+	if (bUseBlockedWallTag && HasBlockedWallTag(Hit))
+	{
+		return false;
+	}
+
+	return true;
+}
+
+bool UPlayerWallMovementComponent::HasBlockedWallTag(const FHitResult& Hit) const
+{
+	if (BlockedWallTag.IsNone())
+	{
+		return false;
+	}
+
+	const UPrimitiveComponent* HitComponent = Hit.GetComponent();
+	if (HitComponent && HitComponent->ComponentHasTag(BlockedWallTag))
+	{
+		return true;
+	}
+
+	const AActor* HitActor = Hit.GetActor();
+	if (HitActor && HitActor->ActorHasTag(BlockedWallTag))
+	{
+		return true;
+	}
+
+	return false;
 }
 
 void UPlayerWallMovementComponent::ClearWallState()
