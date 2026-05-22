@@ -39,16 +39,6 @@ void AKillVolume::OnKillBoxOverlap(
 	const FHitResult& SweepResult
 )
 {
-	if (GEngine)
-	{
-		GEngine->AddOnScreenDebugMessage(
-			-1,
-			2.0f,
-			FColor::Yellow,
-			FString::Printf(TEXT("KillVolume overlapped: %s"), *GetNameSafe(OtherActor))
-		);
-	}
-
 	APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(OtherActor);
 	if (!PlayerCharacter)
 	{

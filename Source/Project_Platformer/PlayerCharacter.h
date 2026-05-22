@@ -39,6 +39,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Player|Respawn")
 	void SetRespawnTransform(const FTransform& NewRespawnTransform);
 	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player|Respawn")
+	float RespawnDelay = 0.35f;
+	
 	UFUNCTION(BlueprintImplementableEvent, Category = "Player|Events")
 	void OnPlayerDied();
 
@@ -141,6 +144,9 @@ private:
 	float JumpBufferCounter = 0.0f;
 	
 	FTransform RespawnTransform;
+	FTimerHandle RespawnTimerHandle;
 
 	bool bIsDead = false;
+	
+	
 };

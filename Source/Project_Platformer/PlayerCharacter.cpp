@@ -7,6 +7,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "InputAction.h"
 #include "InputMappingContext.h"
+#include "TimerManager.h"
 
 APlayerCharacter::APlayerCharacter()
 {
@@ -70,6 +71,11 @@ void APlayerCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	
+	if (bIsDead)
+	{
+		return;
+	}
+	
 	UpdateJumpForgiveness(DeltaTime);
 	TryConsumeBufferedJump();
 
@@ -108,39 +114,54 @@ void APlayerCharacter::KillPlayer()
 	{
 		return;
 	}
-	
-	if (GEngine)
-	{
-		GEngine->AddOnScreenDebugMessage(
-			-1,
-			2.0f,
-			FColor::Red,
-			TEXT("Player killed")
-		);
-	}
 
 	bIsDead = true;
-
+	
+	bIsJumpInputHeld = false;
+	JumpBufferCounter = 0.0f;
+	CoyoteTimeCounter = 0.0f;
+	
+	UCharacterMovementComponent* MovementComponent = GetCharacterMovement();
+	if (MovementComponent)
+	{
+		MovementComponent->StopMovementImmediately();
+		MovementComponent->DisableMovement();
+	}
+	
 	OnPlayerDied();
+	
+	SetActorHiddenInGame(true);
+	SetActorEnableCollision(false);
+	
+	GetWorldTimerManager().SetTimer(
+		RespawnTimerHandle,
+		this,
+		&APlayerCharacter::RespawnPlayer,
+		RespawnDelay,
+		false
+		);
 
-	RespawnPlayer();
 }
 
 
 void APlayerCharacter::RespawnPlayer()
 {
+	SetActorHiddenInGame(false);
+	SetActorEnableCollision(true);
+	
 	SetActorTransform(RespawnTransform, false, nullptr, ETeleportType::TeleportPhysics);
-
+	
 	UCharacterMovementComponent* MovementComponent = GetCharacterMovement();
 	if (MovementComponent)
 	{
 		MovementComponent->StopMovementImmediately();
 		MovementComponent->SetMovementMode(MOVE_Walking);
 	}
-
+	
 	bIsDead = false;
-
+	
 	OnPlayerRespawned();
+	
 }
 
 void APlayerCharacter::SetRespawnTransform(const FTransform& NewRespawnTransform)
