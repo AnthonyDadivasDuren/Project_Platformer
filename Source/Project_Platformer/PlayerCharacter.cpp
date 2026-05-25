@@ -119,6 +119,15 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	}
 }
 
+void APlayerCharacter::SetFixedCameraSettings(float NewDistance, FRotator NewRotation, FVector NewTargetOffset)
+{
+	FixedCameraDistance = NewDistance;
+	FixedCameraRotation = NewRotation;
+	FixedCameraTargetOffset = NewTargetOffset;
+	
+	ApplyFixedCameraSettings();
+}
+
 void APlayerCharacter::KillPlayer()
 {
 	if (bIsDead)

@@ -32,6 +32,9 @@ public:
 	
 public:
 	
+	UFUNCTION(BlueprintCallable, Category = "Camera|Fixed Follow")
+	void SetFixedCameraSettings(float NewDistance, FRotator NewRotation, FVector NewTargetOffset);
+	
 	UFUNCTION(BlueprintCallable, Category = "Player|Death")
 	void KillPlayer();
 	
